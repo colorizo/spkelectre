@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Datang - SPK Energi Terbarukan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1e4d92, #2ea44f);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c5282;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.2em;
+        }
+
+        .content-section {
+            margin-bottom: 30px;
+        }
+
+        .content-section h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .content-section p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #2c5282;
+            margin-bottom: 10px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tambahkan style untuk login */
+        .login-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            width: 320px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+
+        .login-dialog h2 {
+            color: #2c5282;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .login-dialog input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .login-dialog button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .login-dialog button:hover {
+            background: #45a049;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 998;
+        }
+
+        .logout-button:hover {
+            background: #c82333;
+        }
+
+        /* Style untuk sidebar */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #2c5282;
+            transition: 0.3s;
+            padding-top: 60px;
+            z-index: 997;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 15px 25px;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .sidebar ul li a:hover {
+            background: #1a365d;
+        }
+
+        .sidebar ul li a.active {
+            background: #4CAF50;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .toggle-btn:hover {
+            background: #45a049;
+        }
+
+        /* Sesuaikan container untuk sidebar */
+        .container {
+            transition: 0.3s;
+        }
+
+        .container.active {
+            margin-left: 250px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tambahkan sidebar -->
+    <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <div class="sidebar" id="sidebar">
+        <ul>
+            <li><a href="index.html" class="active">Beranda</a></li>
+            <li><a href="kriteria.html">Kriteria</a></li>
+            <li><a href="bobot.html">Bobot</a></li>
+            <li><a href="electre.html">Analisis ELECTRE</a></li>
+        </ul>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="login-dialog" id="loginDialog">
+        <h2>Login</h2>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Masukkan password">
+        </div>
+        <button onclick="checkLogin()">Login</button>
+    </div>
+
+    <button class="logout-button" onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+
+    <div class="container">
+        <div class="welcome-card">
+            <div class="header">
+                <h1>Sistem Pendukung Keputusan</h1>
+                <p>Analisis Pemilihan Alternatif Energi Terbarukan untuk Daerah Pedesaan</p>
+            </div>
+
+            <div class="content-section">
+                <h2>Tentang SPK ELECTRE</h2>
+                <p>ELECTRE (Elimination Et Choix Traduisant la Realité) adalah metode pengambilan keputusan multikriteria berdasarkan pada konsep outranking dengan menggunakan perbandingan berpasangan dari alternatif-alternatif berdasarkan setiap kriteria yang sesuai.</p>
+                <p>Metode ini sangat efektif untuk menganalisis berbagai alternatif dengan banyak kriteria yang kompleks, terutama dalam konteks pemilihan energi terbarukan yang mempertimbangkan berbagai aspek teknis, ekonomi, dan lingkungan.</p>
+            </div>
+
+            <div class="content-section">
+                <h2>Energi Terbarukan untuk Daerah Pedesaan</h2>
+                <p>Pemilihan sumber energi terbarukan yang tepat untuk daerah pedesaan merupakan keputusan strategis yang mempertimbangkan berbagai faktor penting seperti biaya investasi, efisiensi energi, ketersediaan sumber daya, kemudahan pemeliharaan, dan dampak lingkungan.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>Panel Surya</h3>
+                        <p>Memanfaatkan energi matahari untuk menghasilkan listrik, cocok untuk daerah dengan paparan sinar matahari yang baik.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Biogas</h3>
+                        <p>Mengkonversi limbah organik menjadi energi, ideal untuk daerah dengan aktivitas pertanian dan peternakan.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Mikrohidro</h3>
+                        <p>Memanfaatkan aliran air untuk menghasilkan listrik, sesuai untuk daerah dengan sumber air yang memadai.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="electre.html" class="cta-button">Mulai Analisis ELECTRE</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Sistem Pendukung Keputusan ELECTRE. Kelompok 5</p>
+        </div>
+    </div>
+
+    <script>
+        // Efek scroll smooth untuk tombol CTA
+        document.querySelector('.cta-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            if(localStorage.getItem('isLoggedIn') === 'true') {
+                window.location.href = 'electre.html';
+            } else {
+                alert('Silakan login terlebih dahulu!');
+            }
+        });
+
+        // Animasi feature cards saat di-scroll
+        window.addEventListener('scroll', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach(card => {
+                const cardTop = card.getBoundingClientRect().top;
+                if (cardTop < window.innerHeight - 100) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        // Tambahkan script untuk login
+        window.onload = function() {
+            if(localStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('loginDialog').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
+            } else {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('loginDialog').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'none';
+            }
+        }
+
+        function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if(username === 'kelompok5' && password === 'kelompok5') {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('loginDialog').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
+                localStorage.setItem('isLoggedIn', 'true');
+            } else {
+                alert('Username atau Password salah!');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('loginDialog').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'none';
+        }
+
+        // Fungsi untuk toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.container').classList.toggle('active');
+        }
+
+        // Tandai menu aktif berdasarkan halaman saat ini
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const menuLinks = document.querySelectorAll('.sidebar ul li a');
+            
+            menuLinks.forEach(link => {
+                if(link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

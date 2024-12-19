@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjelasan Kriteria - SPK Energi Terbarukan</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f6fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1, h2, h3 {
+            color: #2c5282;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .kriteria-section {
+            margin-bottom: 40px;
+        }
+
+        .kriteria-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #4CAF50;
+        }
+
+        .kriteria-card h3 {
+            color: #2c5282;
+            margin-bottom: 15px;
+        }
+
+        .kriteria-detail {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .kriteria-detail h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        ul li:before {
+            content: "•";
+            color: #4CAF50;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background: #45a049;
+        }
+
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 998;
+        }
+
+        .logout-button:hover {
+            background: #c82333;
+        }
+
+        /* Style untuk sidebar */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #2c5282;
+            transition: 0.3s;
+            padding-top: 60px;
+            z-index: 997;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 15px 25px;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .sidebar ul li a:hover {
+            background: #1a365d;
+        }
+
+        .sidebar ul li a.active {
+            background: #4CAF50;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .toggle-btn:hover {
+            background: #45a049;
+        }
+
+        .container {
+            transition: 0.3s;
+        }
+
+        .container.active {
+            margin-left: 250px;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-button" onclick="logout()">Logout</button>
+
+    <!-- Tambahkan sidebar -->
+    <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <div class="sidebar" id="sidebar">
+        <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="kriteria.html" class="active">Kriteria</a></li>
+            <li><a href="bobot.html">Bobot</a></li>
+            <li><a href="electre.html">Analisis ELECTRE</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="content-card">
+            <h1>Penjelasan Pemilihan Kriteria</h1>
+
+            <div class="kriteria-section">
+                <h2>Mengapa Kriteria Ini Dipilih?</h2>
+                <p>Dalam pemilihan energi terbarukan untuk daerah pedesaan, kriteria-kriteria berikut dipilih berdasarkan pertimbangan komprehensif yang mencakup aspek ekonomi, teknis, sosial, dan lingkungan.</p>
+            </div>
+
+            <div class="kriteria-card">
+                <h3>C1: Biaya Investasi</h3>
+                <p>Kriteria biaya investasi dipilih karena:</p>
+                <div class="kriteria-detail">
+                    <ul>
+                        <li>Keterbatasan dana di daerah pedesaan</li>
+                        <li>Mempengaruhi kelayakan implementasi proyek</li>
+                        <li>Berkaitan dengan kemampuan ekonomi masyarakat</li>
+                        <li>Menentukan keberlanjutan jangka panjang</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kriteria-card">
+                <h3>C2: Efisiensi Energi</h3>
+                <p>Efisiensi energi menjadi kriteria penting karena:</p>
+                <div class="kriteria-detail">
+                    <ul>
+                        <li>Memaksimalkan output energi dari sumber daya yang tersedia</li>
+                        <li>Mengurangi pemborosan energi</li>
+                        <li>Meningkatkan keandalan sistem</li>
+                        <li>Mempengaruhi biaya operasional jangka panjang</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kriteria-card">
+                <h3>C3: Ketersediaan Sumber Daya</h3>
+                <p>Ketersediaan sumber daya dipilih mengingat:</p>
+                <div class="kriteria-detail">
+                    <ul>
+                        <li>Perbedaan potensi sumber daya di setiap daerah</li>
+                        <li>Keberlanjutan pasokan energi</li>
+                        <li>Kemudahan akses terhadap sumber daya</li>
+                        <li>Stabilitas ketersediaan sepanjang tahun</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kriteria-card">
+                <h3>C4: Kemudahan Pemeliharaan</h3>
+                <p>Kriteria pemeliharaan penting karena:</p>
+                <div class="kriteria-detail">
+                    <ul>
+                        <li>Keterbatasan tenaga ahli di daerah pedesaan</li>
+                        <li>Kebutuhan perawatan rutin</li>
+                        <li>Aksesibilitas suku cadang</li>
+                        <li>Kemampuan masyarakat lokal dalam pemeliharaan</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kriteria-card">
+                <h3>C5: Dampak Lingkungan</h3>
+                <p>Dampak lingkungan menjadi pertimbangan karena:</p>
+                <div class="kriteria-detail">
+                    <ul>
+                        <li>Keberlanjutan ekosistem lokal</li>
+                        <li>Perlindungan sumber daya alam</li>
+                        <li>Kesesuaian dengan regulasi lingkungan</li>
+                        <li>Dampak terhadap kesehatan masyarakat</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="kriteria-section">
+                <h2>Kesimpulan</h2>
+                <p>Kelima kriteria ini dipilih untuk memastikan bahwa pemilihan energi terbarukan tidak hanya mempertimbangkan aspek teknis dan ekonomi, tetapi juga memperhatikan keberlanjutan lingkungan dan kemampuan masyarakat lokal dalam pengelolaannya. Kombinasi kriteria ini memungkinkan pengambilan keputusan yang lebih komprehensif dan sesuai dengan kondisi daerah pedesaan.</p>
+            </div>
+
+            <a href="electre.html" class="back-button">Kembali ke Analisis</a>
+        </div>
+    </div>
+
+    <script>
+        // Cek status login saat halaman dimuat
+        window.onload = function() {
+            if(localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        }
+
+        // Fungsi untuk toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.container').classList.toggle('active');
+        }
+
+        // Tandai menu aktif
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const menuLinks = document.querySelectorAll('.sidebar ul li a');
+            
+            menuLinks.forEach(link => {
+                if(link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

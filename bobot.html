@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjelasan Bobot - SPK Energi Terbarukan</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f6fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1, h2, h3 {
+            color: #2c5282;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .bobot-section {
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .info-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .example-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background: #45a049;
+        }
+
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 998;
+        }
+
+        .logout-button:hover {
+            background: #c82333;
+        }
+
+        /* Style untuk sidebar */
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #2c5282;
+            transition: 0.3s;
+            padding-top: 60px;
+            z-index: 997;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 15px 25px;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .sidebar ul li a:hover {
+            background: #1a365d;
+        }
+
+        .sidebar ul li a.active {
+            background: #4CAF50;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .toggle-btn:hover {
+            background: #45a049;
+        }
+
+        .container {
+            transition: 0.3s;
+        }
+
+        .container.active {
+            margin-left: 250px;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-button" onclick="logout()">Logout</button>
+
+    <button class="toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+    <div class="sidebar" id="sidebar">
+        <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="kriteria.html">Kriteria</a></li>
+            <li><a href="bobot.html" class="active">Bobot</a></li>
+            <li><a href="electre.html">Analisis ELECTRE</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="content-card">
+            <h1>Penjelasan Pembobotan Kriteria</h1>
+
+            <div class="bobot-section">
+                <h2>Pengertian Bobot Kriteria</h2>
+                <p>Bobot kriteria merupakan nilai yang mencerminkan tingkat kepentingan relatif dari setiap kriteria dalam pengambilan keputusan. Dalam metode ELECTRE, pembobotan kriteria sangat penting karena mempengaruhi hasil akhir dari proses pengambilan keputusan.</p>
+            </div>
+
+            <div class="bobot-section">
+                <h2>Skala Pembobotan</h2>
+                <table>
+                    <tr>
+                        <th>Nilai Bobot</th>
+                        <th>Tingkat Kepentingan</th>
+                        <th>Keterangan</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Sangat Rendah</td>
+                        <td>Kriteria memiliki pengaruh yang sangat kecil terhadap keputusan</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Rendah</td>
+                        <td>Kriteria memiliki pengaruh kecil terhadap keputusan</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Cukup</td>
+                        <td>Kriteria memiliki pengaruh sedang terhadap keputusan</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Tinggi</td>
+                        <td>Kriteria memiliki pengaruh besar terhadap keputusan</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Sangat Tinggi</td>
+                        <td>Kriteria memiliki pengaruh sangat besar terhadap keputusan</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="bobot-section">
+                <h2>Kriteria dalam Pemilihan Energi Terbarukan</h2>
+                <div class="info-box">
+                    <h3>C1: Biaya Investasi</h3>
+                    <p>Mencakup biaya awal untuk pembangunan dan instalasi sistem energi terbarukan. Semakin rendah biaya investasi, semakin tinggi nilainya.</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>C2: Efisiensi Energi</h3>
+                    <p>Mengukur seberapa efektif sistem mengkonversi sumber daya menjadi energi yang dapat digunakan. Semakin tinggi efisiensi, semakin baik.</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>C3: Ketersediaan Sumber Daya</h3>
+                    <p>Menilai ketersediaan sumber daya alam yang diperlukan untuk sistem energi terbarukan di lokasi tertentu.</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>C4: Kemudahan Pemeliharaan</h3>
+                    <p>Mengukur tingkat kesulitan dalam pemeliharaan dan perawatan sistem energi terbarukan.</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>C5: Dampak Lingkungan</h3>
+                    <p>Menilai seberapa ramah lingkungan sistem energi terbarukan tersebut.</p>
+                </div>
+            </div>
+
+            <div class="bobot-section">
+                <h2>Contoh Penerapan Bobot</h2>
+                <div class="example-box">
+                    <h3>Skenario: Daerah Pedesaan dengan Keterbatasan Dana</h3>
+                    <ul>
+                        <li>Biaya Investasi (C1): 5 (Sangat Tinggi) - karena keterbatasan dana</li>
+                        <li>Efisiensi Energi (C2): 4 (Tinggi) - untuk memastikan keberlanjutan</li>
+                        <li>Ketersediaan Sumber Daya (C3): 4 (Tinggi) - penting untuk keberlanjutan</li>
+                        <li>Kemudahan Pemeliharaan (C4): 3 (Cukup) - disesuaikan dengan kemampuan lokal</li>
+                        <li>Dampak Lingkungan (C5): 3 (Cukup) - tetap mempertimbangkan aspek lingkungan</li>
+                    </ul>
+                </div>
+            </div>
+
+            <a href="electre.html" class="back-button">Kembali ke Analisis</a>
+        </div>
+    </div>
+
+    <script>
+        // Cek status login saat halaman dimuat
+        window.onload = function() {
+            if(localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'index.html';
+        }
+
+        // Fungsi untuk toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.container').classList.toggle('active');
+        }
+
+        // Tandai menu aktif
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const menuLinks = document.querySelectorAll('.sidebar ul li a');
+            
+            menuLinks.forEach(link => {
+                if(link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
