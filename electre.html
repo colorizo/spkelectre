@@ -168,7 +168,98 @@
         .container.active {
             margin-left: 250px;
         }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        #saveDbBtn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #saveDbBtn:hover {
+            background-color: #218838;
+        }
+        
+        #saveDbBtn::before {
+            content: "💾";
+        }
+        
+        #saveStatus {
+            text-align: center;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        #saveStatus.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        #saveStatus.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .fas {
+            font-size: 14px;
+        }
     </style>
+    <!-- Tambahkan CSS Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tambahkan library jsPDF dan html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- Tambahkan Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <!-- Tambahkan sidebar -->
@@ -179,6 +270,7 @@
             <li><a href="kriteria.html">Kriteria</a></li>
             <li><a href="bobot.html">Bobot</a></li>
             <li><a href="electre.html" class="active">Analisis ELECTRE</a></li>
+            <li><a href="electre.php">Riwayat Perhitungan</a></li>
         </ul>
     </div>
 
@@ -186,6 +278,12 @@
         <div class="header">
             <h1>Sistem Pendukung Keputusan Pemilihan Energi Terbarukan</h1>
             <p>Analisis Pemilihan Alternatif Energi Terbarukan untuk Daerah Pedesaan</p>
+        </div>
+
+        <!-- Tambahkan input lokasi -->
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="lokasi"><strong>Lokasi:</strong></label>
+            <input type="text" id="lokasi" class="form-control" placeholder="Masukkan nama desa/lokasi" required>
         </div>
 
         <div id="input-section">
@@ -348,555 +446,627 @@
         </div>
 
         <div id="hasil-section"></div>
-    </div>
+        <div class="button-group" style="margin-top: 20px;">
+            <button id="saveDbBtn" onclick="saveToDatabase()" style="display: none;">Simpan ke Database</button>
+        </div>
+        <div id="saveStatus" style="margin-top: 10px; padding: 10px; display: none;"></div>
 
-    <button class="logout-button" onclick="logout()">Logout</button>
+        <!-- Template untuk PDF -->
+        <div id="pdfTemplate" style="display: none;">
+            <div class="pdf-content" style="padding: 20px; font-family: Arial, sans-serif;">
+                <!-- Header Laporan -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #2c5282; margin-bottom: 10px;">Laporan Hasil Analisis ELECTRE</h2>
+                    <h3 style="color: #4a5568; font-weight: normal;">Sistem Pendukung Keputusan Pemilihan Energi Terbarukan</h3>
+                    <div style="margin-top: 20px; font-size: 16px;">
+                        <p><strong>Lokasi:</strong> <span id="pdf-lokasi"></span></p>
+                        <p><strong>Tanggal Analisis:</strong> <span id="pdf-tanggal"></span></p>
+                    </div>
+                </div>
 
-    <script>
-        window.onload = function() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('loginDialog').style.display = 'block';
-        }
+                <!-- Informasi Kriteria -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #2c5282; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
+                        Informasi Kriteria
+                    </h3>
+                    <table class="table table-bordered" style="margin-top: 15px;">
+                        <thead style="background-color: #4CAF50; color: white;">
+                            <tr>
+                                <th>Kode</th>
+                                <th>Kriteria</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>C1</td><td>Biaya Investasi</td><td>Biaya yang dibutuhkan untuk implementasi</td></tr>
+                            <tr><td>C2</td><td>Efisiensi Energi</td><td>Tingkat efisiensi konversi energi</td></tr>
+                            <tr><td>C3</td><td>Ketersediaan Sumber Daya</td><td>Ketersediaan sumber energi di lokasi</td></tr>
+                            <tr><td>C4</td><td>Kemudahan Pemeliharaan</td><td>Tingkat kesulitan dalam pemeliharaan</td></tr>
+                            <tr><td>C5</td><td>Dampak Lingkungan</td><td>Pengaruh terhadap lingkungan sekitar</td></tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        function hitungElectre() {
-            // Mengambil nilai matriks keputusan
-            let matriks = [
-                [
-                    parseFloat(document.getElementById('a1-c1').value),
-                    parseFloat(document.getElementById('a1-c2').value),
-                    parseFloat(document.getElementById('a1-c3').value),
-                    parseFloat(document.getElementById('a1-c4').value),
-                    parseFloat(document.getElementById('a1-c5').value)
-                ],
-                [
-                    parseFloat(document.getElementById('a2-c1').value),
-                    parseFloat(document.getElementById('a2-c2').value),
-                    parseFloat(document.getElementById('a2-c3').value),
-                    parseFloat(document.getElementById('a2-c4').value),
-                    parseFloat(document.getElementById('a2-c5').value)
-                ],
-                [
-                    parseFloat(document.getElementById('a3-c1').value),
-                    parseFloat(document.getElementById('a3-c2').value),
-                    parseFloat(document.getElementById('a3-c3').value),
-                    parseFloat(document.getElementById('a3-c4').value),
-                    parseFloat(document.getElementById('a3-c5').value)
-                ]
-            ];
-            console.log("Matriks Keputusan:", matriks);
+                <!-- Data Input -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #2c5282; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
+                        Data Input Analisis
+                    </h3>
+                    <div class="input-section mb-4">
+                        <h4 style="color: #4a5568;">Matriks Keputusan:</h4>
+                        <div id="inputMatriks"></div>
+                        <h4 style="color: #4a5568; margin-top: 20px;">Bobot Kriteria:</h4>
+                        <div id="inputBobot"></div>
+                    </div>
+                </div>
 
-            // Mengambil bobot
-            let bobot = [
-                parseFloat(document.getElementById('w1').value),
-                parseFloat(document.getElementById('w2').value),
-                parseFloat(document.getElementById('w3').value),
-                parseFloat(document.getElementById('w4').value),
-                parseFloat(document.getElementById('w5').value)
-            ];
-            console.log("Bobot Kriteria:", bobot);
+                <!-- Hasil Analisis -->
+                <div class="hasil-section">
+                    <h3 style="color: #2c5282; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
+                        Hasil Analisis ELECTRE
+                    </h3>
+                    <div id="hasilAnalisis"></div>
+                    
+                    <!-- Rekomendasi -->
+                    <div id="rekomendasi" style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                        <h4 style="color: #2c5282;">Rekomendasi:</h4>
+                        <div id="rekomendasiText"></div>
+                    </div>
+                </div>
 
-            // Validasi input
-            if (!validasiInput(matriks, bobot)) {
-                console.log("Validasi gagal: Ada input yang tidak valid");
-                alert('Mohon isi semua nilai dengan angka 1-5');
-                return;
+                <!-- Footer -->
+                <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #666;">
+                    <p>Dokumen ini dihasilkan secara otomatis oleh Sistem Pendukung Keputusan ELECTRE</p>
+                    <p>© 2024 Kelompok 5</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.onload = function() {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('loginDialog').style.display = 'block';
             }
 
-            // Proses perhitungan
-            let matriksNormalisasi = normalisasi(matriks);
-            console.log("Matriks Normalisasi:", matriksNormalisasi);
+            let currentHasilPerhitungan = null;
 
-            let matriksPembobotan = pembobotan(matriksNormalisasi, bobot);
-            console.log("Matriks Pembobotan:", matriksPembobotan);
+            function hitungElectre() {
+                // Validasi lokasi
+                const lokasi = document.getElementById('lokasi').value.trim();
+                if (!lokasi) {
+                    alert('Mohon isi lokasi terlebih dahulu');
+                    return;
+                }
 
-            let [concordance, discordance] = hitungConcordanceDiscordance(matriksPembobotan);
-            console.log("Himpunan Concordance:", concordance);
-            console.log("Himpunan Discordance:", discordance);
+                // Mengambil nilai matriks keputusan
+                let matriks = [
+                    [
+                        parseFloat(document.getElementById('a1-c1').value),
+                        parseFloat(document.getElementById('a1-c2').value),
+                        parseFloat(document.getElementById('a1-c3').value),
+                        parseFloat(document.getElementById('a1-c4').value),
+                        parseFloat(document.getElementById('a1-c5').value)
+                    ],
+                    [
+                        parseFloat(document.getElementById('a2-c1').value),
+                        parseFloat(document.getElementById('a2-c2').value),
+                        parseFloat(document.getElementById('a2-c3').value),
+                        parseFloat(document.getElementById('a2-c4').value),
+                        parseFloat(document.getElementById('a2-c5').value)
+                    ],
+                    [
+                        parseFloat(document.getElementById('a3-c1').value),
+                        parseFloat(document.getElementById('a3-c2').value),
+                        parseFloat(document.getElementById('a3-c3').value),
+                        parseFloat(document.getElementById('a3-c4').value),
+                        parseFloat(document.getElementById('a3-c5').value)
+                    ]
+                ];
+                console.log("Matriks Keputusan:", matriks);
 
-            let matriksConcordance = hitungMatriksConcordance(concordance, bobot);
-            console.log("Matriks Concordance:", matriksConcordance);
+                // Mengambil bobot
+                let bobot = [
+                    parseFloat(document.getElementById('w1').value),
+                    parseFloat(document.getElementById('w2').value),
+                    parseFloat(document.getElementById('w3').value),
+                    parseFloat(document.getElementById('w4').value),
+                    parseFloat(document.getElementById('w5').value)
+                ];
+                console.log("Bobot Kriteria:", bobot);
 
-            let matriksDiscordance = hitungMatriksDiscordance(discordance, matriksPembobotan);
-            console.log("Matriks Discordance:", matriksDiscordance);
+                // Validasi input
+                if (!validasiInput(matriks, bobot)) {
+                    console.log("Validasi gagal: Ada input yang tidak valid");
+                    alert('Mohon isi semua nilai dengan angka 1-5');
+                    return;
+                }
 
-            // Menghitung threshold
-            let threshold_c = hitungThresholdConcordance(matriksConcordance);
-            let threshold_d = hitungThresholdDiscordance(matriksDiscordance);
-            console.log("Threshold Concordance:", threshold_c);
-            console.log("Threshold Discordance:", threshold_d);
+                // Proses perhitungan
+                let matriksNormalisasi = normalisasi(matriks);
+                console.log("Matriks Normalisasi:", matriksNormalisasi);
 
-            // Menghitung matriks dominan
-            let matriksDominanC = hitungMatriksDominan(matriksConcordance, threshold_c, true);
-            let matriksDominanD = hitungMatriksDominanDiscordance(matriksDiscordance, threshold_d);
-            console.log("Matriks Dominan Concordance:", matriksDominanC);
-            console.log("Matriks Dominan Discordance:", matriksDominanD);
+                let matriksPembobotan = pembobotan(matriksNormalisasi, bobot);
+                console.log("Matriks Pembobotan:", matriksPembobotan);
 
-            // Menghitung aggregate
-            let matriksAggregate = hitungMatriksAggregate(matriksDominanC, matriksDominanD);
-            console.log("Matriks Aggregate:", matriksAggregate);
+                let [concordance, discordance] = hitungConcordanceDiscordance(matriksPembobotan);
+                console.log("Himpunan Concordance:", concordance);
+                console.log("Himpunan Discordance:", discordance);
 
-            // Menghitung peringkat
-            let peringkat = hitungPeringkat(matriksConcordance);
-            console.log("Peringkat Akhir:", peringkat);
+                let matriksConcordance = hitungMatriksConcordance(concordance, bobot);
+                console.log("Matriks Concordance:", matriksConcordance);
 
-            tampilkanHasil(matriksNormalisasi, matriksPembobotan, matriksConcordance, matriksDiscordance, matriksAggregate);
-        }
+                let matriksDiscordance = hitungMatriksDiscordance(discordance, matriksPembobotan);
+                console.log("Matriks Discordance:", matriksDiscordance);
 
-        function validasiInput(matriks, bobot) {
-            for(let i = 0; i < matriks.length; i++) {
-                for(let j = 0; j < matriks[i].length; j++) {
-                    if (isNaN(matriks[i][j]) || matriks[i][j] < 1 || matriks[i][j] > 5) {
+                // Menghitung threshold
+                let threshold_c = hitungThresholdConcordance(matriksConcordance);
+                let threshold_d = hitungThresholdDiscordance(matriksDiscordance);
+                console.log("Threshold Concordance:", threshold_c);
+                console.log("Threshold Discordance:", threshold_d);
+
+                // Menghitung matriks dominan
+                let matriksDominanC = hitungMatriksDominan(matriksConcordance, threshold_c, true);
+                let matriksDominanD = hitungMatriksDominanDiscordance(matriksDiscordance, threshold_d);
+                console.log("Matriks Dominan Concordance:", matriksDominanC);
+                console.log("Matriks Dominan Discordance:", matriksDominanD);
+
+                // Menghitung aggregate
+                let matriksAggregate = hitungMatriksAggregate(matriksDominanC, matriksDominanD);
+                console.log("Matriks Aggregate:", matriksAggregate);
+
+                // Menghitung peringkat
+                let peringkat = hitungPeringkat(matriksConcordance);
+                console.log("Peringkat Akhir:", peringkat);
+
+                // Setelah perhitungan selesai, simpan hasil
+                currentHasilPerhitungan = {
+                    matriks: matriks,
+                    bobot: bobot,
+                    peringkat: peringkat,
+                    lokasi: lokasi
+                };
+
+                // Tampilkan hasil
+                tampilkanHasil(matriksNormalisasi, matriksPembobotan, matriksConcordance, matriksDiscordance, matriksAggregate);
+            }
+
+            function validasiInput(matriks, bobot) {
+                for(let i = 0; i < matriks.length; i++) {
+                    for(let j = 0; j < matriks[i].length; j++) {
+                        if (isNaN(matriks[i][j]) || matriks[i][j] < 1 || matriks[i][j] > 5) {
+                            return false;
+                        }
+                    }
+                }
+                for(let i = 0; i < bobot.length; i++) {
+                    if (isNaN(bobot[i]) || bobot[i] < 1 || bobot[i] > 5) {
                         return false;
                     }
                 }
-            }
-            for(let i = 0; i < bobot.length; i++) {
-                if (isNaN(bobot[i]) || bobot[i] < 1 || bobot[i] > 5) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Fungsi normalisasi matriks
-        function normalisasi(matriks) {
-            let hasil = [];
-            let jumlahKolom = matriks[0].length;
-            let jumlahBaris = matriks.length;
-
-            // Hitung jumlah kuadrat untuk setiap kolom
-            let sumKuadratKolom = new Array(jumlahKolom).fill(0);
-            for(let j = 0; j < jumlahKolom; j++) {
-                for(let i = 0; i < jumlahBaris; i++) {
-                    sumKuadratKolom[j] += Math.pow(matriks[i][j], 2);
-                }
-                sumKuadratKolom[j] = Math.sqrt(sumKuadratKolom[j]);
+                return true;
             }
 
-            // Hitung normalisasi
-            for(let i = 0; i < jumlahBaris; i++) {
-                hasil[i] = [];
+            // Fungsi normalisasi matriks
+            function normalisasi(matriks) {
+                let hasil = [];
+                let jumlahKolom = matriks[0].length;
+                let jumlahBaris = matriks.length;
+
+                // Hitung jumlah kuadrat untuk setiap kolom
+                let sumKuadratKolom = new Array(jumlahKolom).fill(0);
                 for(let j = 0; j < jumlahKolom; j++) {
-                    hasil[i][j] = matriks[i][j] / sumKuadratKolom[j];
+                    for(let i = 0; i < jumlahBaris; i++) {
+                        sumKuadratKolom[j] += Math.pow(matriks[i][j], 2);
+                    }
+                    sumKuadratKolom[j] = Math.sqrt(sumKuadratKolom[j]);
                 }
-            }
-            return hasil;
-        }
 
-        // Fungsi pembobotan
-        function pembobotan(matriks, bobot) {
-            let hasil = [];
-            for(let i = 0; i < matriks.length; i++) {
-                hasil[i] = [];
-                for(let j = 0; j < matriks[0].length; j++) {
-                    hasil[i][j] = matriks[i][j] * bobot[j];
+                // Hitung normalisasi
+                for(let i = 0; i < jumlahBaris; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < jumlahKolom; j++) {
+                        hasil[i][j] = matriks[i][j] / sumKuadratKolom[j];
+                    }
                 }
+                return hasil;
             }
-            return hasil;
-        }
 
-        // Fungsi menghitung concordance dan discordance
-        function hitungConcordanceDiscordance(matriks) {
-            let concordance = [];
-            let discordance = [];
-            
-            for(let i = 0; i < matriks.length; i++) {
-                concordance[i] = [];
-                discordance[i] = [];
-                for(let j = 0; j < matriks.length; j++) {
-                    if(i !== j) {
-                        concordance[i][j] = [];
-                        discordance[i][j] = [];
-                        for(let k = 0; k < matriks[0].length; k++) {
-                            if(matriks[i][k] >= matriks[j][k]) {
-                                concordance[i][j].push(k);
-                            } else {
-                                discordance[i][j].push(k);
+            // Fungsi pembobotan
+            function pembobotan(matriks, bobot) {
+                let hasil = [];
+                for(let i = 0; i < matriks.length; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < matriks[0].length; j++) {
+                        hasil[i][j] = matriks[i][j] * bobot[j];
+                    }
+                }
+                return hasil;
+            }
+
+            // Fungsi menghitung concordance dan discordance
+            function hitungConcordanceDiscordance(matriks) {
+                let concordance = [];
+                let discordance = [];
+                
+                for(let i = 0; i < matriks.length; i++) {
+                    concordance[i] = [];
+                    discordance[i] = [];
+                    for(let j = 0; j < matriks.length; j++) {
+                        if(i !== j) {
+                            concordance[i][j] = [];
+                            discordance[i][j] = [];
+                            for(let k = 0; k < matriks[0].length; k++) {
+                                if(matriks[i][k] >= matriks[j][k]) {
+                                    concordance[i][j].push(k);
+                                } else {
+                                    discordance[i][j].push(k);
+                                }
                             }
                         }
                     }
                 }
+                return [concordance, discordance];
             }
-            return [concordance, discordance];
-        }
 
-        // Fungsi menghitung matriks concordance
-        function hitungMatriksConcordance(concordance, bobot) {
-            let matriks = [];
-            for(let i = 0; i < concordance.length; i++) {
-                matriks[i] = [];
-                for(let j = 0; j < concordance.length; j++) {
-                    if(i !== j) {
-                        let nilai = 0;
-                        for(let k = 0; k < concordance[i][j].length; k++) {
-                            nilai += bobot[concordance[i][j][k]];
+            // Fungsi menghitung matriks concordance
+            function hitungMatriksConcordance(concordance, bobot) {
+                let matriks = [];
+                for(let i = 0; i < concordance.length; i++) {
+                    matriks[i] = [];
+                    for(let j = 0; j < concordance.length; j++) {
+                        if(i !== j) {
+                            let nilai = 0;
+                            for(let k = 0; k < concordance[i][j].length; k++) {
+                                nilai += bobot[concordance[i][j][k]];
+                            }
+                            matriks[i][j] = nilai;
                         }
-                        matriks[i][j] = nilai;
                     }
                 }
+                return matriks;
             }
-            return matriks;
-        }
 
-        // Fungsi menghitung matriks discordance
-        function hitungMatriksDiscordance(discordance, matriks) {
-            let hasil = [];
-            for(let i = 0; i < discordance.length; i++) {
-                hasil[i] = [];
-                for(let j = 0; j < discordance.length; j++) {
-                    if(i !== j) {
-                        let maksDiscordance = 0;
-                        let maksSeluruh = 0;
-                        
-                        for(let k = 0; k < discordance[i][j].length; k++) {
-                            let selisih = Math.abs(matriks[i][discordance[i][j][k]] - matriks[j][discordance[i][j][k]]);
-                            maksDiscordance = Math.max(maksDiscordance, selisih);
+            // Fungsi menghitung matriks discordance
+            function hitungMatriksDiscordance(discordance, matriks) {
+                let hasil = [];
+                for(let i = 0; i < discordance.length; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < discordance.length; j++) {
+                        if(i !== j) {
+                            let maksDiscordance = 0;
+                            let maksSeluruh = 0;
+                            
+                            for(let k = 0; k < discordance[i][j].length; k++) {
+                                let selisih = Math.abs(matriks[i][discordance[i][j][k]] - matriks[j][discordance[i][j][k]]);
+                                maksDiscordance = Math.max(maksDiscordance, selisih);
+                            }
+                            
+                            for(let k = 0; k < matriks[0].length; k++) {
+                                let selisih = Math.abs(matriks[i][k] - matriks[j][k]);
+                                maksSeluruh = Math.max(maksSeluruh, selisih);
+                            }
+                            
+                            hasil[i][j] = maksDiscordance / (maksSeluruh || 1); // Menghindari pembagian dengan 0
                         }
-                        
-                        for(let k = 0; k < matriks[0].length; k++) {
-                            let selisih = Math.abs(matriks[i][k] - matriks[j][k]);
-                            maksSeluruh = Math.max(maksSeluruh, selisih);
+                    }
+                }
+                return hasil;
+            }
+
+            // Fungsi menampilkan hasil
+            function tampilkanHasil(matriksNormalisasi, matriksPembobotan, matriksConcordance, matriksDiscordance, matriksAggregate) {
+                let html = '<h2>Hasil Perhitungan ELECTRE</h2>';
+                
+                // Matriks Normalisasi
+                html += '<h3>1. Matriks Normalisasi</h3>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Rumus Normalisasi:</strong></p>
+                        <p>r<sub>ij</sub> = x<sub>ij</sub> / √(Σx<sub>ij</sub>²)</p>
+                        <p>Dimana:</p>
+                        <ul>
+                            <li>r<sub>ij</sub> = nilai normalisasi</li>
+                            <li>x<sub>ij</sub> = nilai dari alternatif i kriteria j</li>
+                            <li>√(Σx<sub>ij</sub>²) = akar dari jumlah kuadrat nilai kriteria</li>
+                        </ul>
+                    </div>
+                `;
+                html += buatTabelHasil(matriksNormalisasi, false, true);
+                
+                // Matriks Pembobotan
+                html += '<h3>2. Matriks Pembobotan</h3>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Rumus Pembobotan:</strong></p>
+                        <p>v<sub>ij</sub> = w<sub>j</sub> × r<sub>ij</sub></p>
+                        <p>Dimana:</p>
+                        <ul>
+                            <li>v<sub>ij</sub> = nilai pembobotan</li>
+                            <li>w<sub>j</sub> = bobot kriteria j</li>
+                            <li>r<sub>ij</sub> = nilai normalisasi</li>
+                        </ul>
+                    </div>
+                `;
+                html += buatTabelHasil(matriksPembobotan, false, true);
+                
+                // 3. Analisis Concordance dan Discordance
+                html += '<h3>3. Analisis Concordance dan Discordance</h3>';
+
+                // 3.1 Himpunan Concordance dan Discordance
+                html += '<h4>3.1 Himpunan Concordance dan Discordance</h4>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Penentuan Himpunan:</strong></p>
+                        <p>Concordance: C<sub>kl</sub> = {j | v<sub>kj</sub> ≥ v<sub>lj</sub>}</p>
+                        <p>Discordance: D<sub>kl</sub> = {j | v<sub>kj</sub> < v<sub>lj</sub>}</p>
+                    </div>
+                `;
+
+                let [concordanceSet, discordanceSet] = hitungConcordanceDiscordance(matriksPembobotan);
+                html += '<p><strong>Himpunan Concordance:</strong></p>';
+                html += '<table>';
+                for(let i = 0; i < concordanceSet.length; i++) {
+                    for(let j = 0; j < concordanceSet.length; j++) {
+                        if(i !== j) {
+                            html += `<tr><td>C${i+1}${j+1} = {${concordanceSet[i][j].map(k => k+1).join(', ')}}</td></tr>`;
                         }
-                        
-                        hasil[i][j] = maksDiscordance / (maksSeluruh || 1); // Menghindari pembagian dengan 0
                     }
                 }
-            }
-            return hasil;
-        }
+                html += '</table>';
 
-        // Fungsi menampilkan hasil
-        function tampilkanHasil(matriksNormalisasi, matriksPembobotan, matriksConcordance, matriksDiscordance, matriksAggregate) {
-            let html = '<h2>Hasil Perhitungan ELECTRE</h2>';
-            
-            // Matriks Normalisasi
-            html += '<h3>1. Matriks Normalisasi</h3>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Rumus Normalisasi:</strong></p>
-                    <p>r<sub>ij</sub> = x<sub>ij</sub> / √(Σx<sub>ij</sub>²)</p>
-                    <p>Dimana:</p>
-                    <ul>
-                        <li>r<sub>ij</sub> = nilai normalisasi</li>
-                        <li>x<sub>ij</sub> = nilai dari alternatif i kriteria j</li>
-                        <li>√(Σx<sub>ij</sub>²) = akar dari jumlah kuadrat nilai kriteria</li>
-                    </ul>
-                </div>
-            `;
-            html += buatTabelHasil(matriksNormalisasi, false, true);
-            
-            // Matriks Pembobotan
-            html += '<h3>2. Matriks Pembobotan</h3>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Rumus Pembobotan:</strong></p>
-                    <p>v<sub>ij</sub> = w<sub>j</sub> × r<sub>ij</sub></p>
-                    <p>Dimana:</p>
-                    <ul>
-                        <li>v<sub>ij</sub> = nilai pembobotan</li>
-                        <li>w<sub>j</sub> = bobot kriteria j</li>
-                        <li>r<sub>ij</sub> = nilai normalisasi</li>
-                    </ul>
-                </div>
-            `;
-            html += buatTabelHasil(matriksPembobotan, false, true);
-            
-            // 3. Analisis Concordance dan Discordance
-            html += '<h3>3. Analisis Concordance dan Discordance</h3>';
-
-            // 3.1 Himpunan Concordance dan Discordance
-            html += '<h4>3.1 Himpunan Concordance dan Discordance</h4>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Penentuan Himpunan:</strong></p>
-                    <p>Concordance: C<sub>kl</sub> = {j | v<sub>kj</sub> ≥ v<sub>lj</sub>}</p>
-                    <p>Discordance: D<sub>kl</sub> = {j | v<sub>kj</sub> < v<sub>lj</sub>}</p>
-                </div>
-            `;
-
-            let [concordanceSet, discordanceSet] = hitungConcordanceDiscordance(matriksPembobotan);
-            html += '<p><strong>Himpunan Concordance:</strong></p>';
-            html += '<table>';
-            for(let i = 0; i < concordanceSet.length; i++) {
-                for(let j = 0; j < concordanceSet.length; j++) {
-                    if(i !== j) {
-                        html += `<tr><td>C${i+1}${j+1} = {${concordanceSet[i][j].map(k => k+1).join(', ')}}</td></tr>`;
+                html += '<p><strong>Himpunan Discordance:</strong></p>';
+                html += '<table>';
+                for(let i = 0; i < discordanceSet.length; i++) {
+                    for(let j = 0; j < discordanceSet.length; j++) {
+                        if(i !== j) {
+                            html += `<tr><td>D${i+1}${j+1} = {${discordanceSet[i][j].map(k => k+1).join(', ')}}</td></tr>`;
+                        }
                     }
                 }
-            }
-            html += '</table>';
+                html += '</table>';
 
-            html += '<p><strong>Himpunan Discordance:</strong></p>';
-            html += '<table>';
-            for(let i = 0; i < discordanceSet.length; i++) {
-                for(let j = 0; j < discordanceSet.length; j++) {
-                    if(i !== j) {
-                        html += `<tr><td>D${i+1}${j+1} = {${discordanceSet[i][j].map(k => k+1).join(', ')}}</td></tr>`;
+                // 3.2 Matriks Concordance dan Discordance
+                html += '<h4>3.2 Matriks Concordance dan Discordance</h4>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Rumus Matriks Concordance:</strong></p>
+                        <p>c<sub>kl</sub> = Σw<sub>j</sub>, untuk j ∈ C<sub>kl</sub></p>
+                        <p><strong>Rumus Matriks Discordance:</strong></p>
+                        <p>d<sub>kl</sub> = max{|v<sub>kj</sub> - v<sub>lj</sub>|} / max{|v<sub>kj</sub> - v<sub>lj</sub>|}</p>
+                    </div>
+                `;
+                html += '<p><strong>Matriks Concordance:</strong></p>';
+                html += buatTabelHasil(matriksConcordance);
+                html += '<p><strong>Matriks Discordance:</strong></p>';
+                html += buatTabelHasil(matriksDiscordance);
+
+                // 3.3 Matriks Dominan
+                html += '<h4>3.3 Matriks Dominan</h4>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Threshold Concordance:</strong></p>
+                        <p>c = (1/m(m-1)) × ΣΣc<sub>kl</sub></p>
+                        <p><strong>Threshold Discordance:</strong></p>
+                        <p>d = (1/m(m-1)) × ΣΣd<sub>kl</sub></p>
+                    </div>
+                `;
+
+                let threshold_c = hitungThresholdConcordance(matriksConcordance);
+                let threshold_d = hitungThresholdDiscordance(matriksDiscordance);
+                let matriksDominanC = hitungMatriksDominan(matriksConcordance, threshold_c, true);
+                let matriksDominanD = hitungMatriksDominanDiscordance(matriksDiscordance, threshold_d);
+
+                html += `<p>Threshold Concordance (c) = ${threshold_c.toFixed(3)}</p>`;
+                html += '<p><strong>Matriks Dominan Concordance:</strong></p>';
+                html += buatTabelHasil(matriksDominanC);
+
+                html += `<p>Threshold Discordance (d) = ${threshold_d.toFixed(3)}</p>`;
+                html += '<p><strong>Matriks Dominan Discordance:</strong></p>';
+                html += buatTabelHasil(matriksDominanD);
+
+                // 3.4 Aggregate Dominance Matrix
+                html += '<h4>3.4 Aggregate Dominance Matrix</h4>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Rumus Aggregate Dominance Matrix:</strong></p>
+                        <p>e<sub>kl</sub> = f<sub>kl</sub> × g<sub>kl</sub></p>
+                        <p>Dimana:</p>
+                        <ul>
+                            <li>e<sub>kl</sub> = elemen aggregate dominance matrix</li>
+                            <li>f<sub>kl</sub> = elemen matriks dominan concordance</li>
+                            <li>g<sub>kl</sub> = elemen matriks dominan discordance</li>
+                        </ul>
+                    </div>
+                `;
+                html += buatTabelHasil(matriksAggregate);
+
+                // 3.5 Eliminasi Alternatif Less Favourable
+                html += '<h4>3.5 Eliminasi Alternatif Less Favourable</h4>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Analisis Eliminasi:</strong></p>
+                        <p>Berdasarkan Aggregate Dominance Matrix:</p>
+                        <ul>
+                `;
+
+                // Analisis eliminasi berdasarkan Aggregate Dominance Matrix
+                for(let i = 0; i < matriksAggregate.length; i++) {
+                    for(let j = 0; j < matriksAggregate.length; j++) {
+                        if(i !== j && matriksAggregate[i][j] === 1) {
+                            html += `<li><strong>${getAlternatifLabel(i)}</strong> mendominasi <strong>${getAlternatifLabel(j)}</strong> 
+                                    (e<sub>${i+1}${j+1}</sub> = 1)</li>`;
+                        }
                     }
                 }
-            }
-            html += '</table>';
 
-            // 3.2 Matriks Concordance dan Discordance
-            html += '<h4>3.2 Matriks Concordance dan Discordance</h4>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Rumus Matriks Concordance:</strong></p>
-                    <p>c<sub>kl</sub> = Σw<sub>j</sub>, untuk j ∈ C<sub>kl</sub></p>
-                    <p><strong>Rumus Matriks Discordance:</strong></p>
-                    <p>d<sub>kl</sub> = max{|v<sub>kj</sub> - v<sub>lj</sub>|} / max{|v<sub>kj</sub> - v<sub>lj</sub>|}</p>
-                </div>
-            `;
-            html += '<p><strong>Matriks Concordance:</strong></p>';
-            html += buatTabelHasil(matriksConcordance);
-            html += '<p><strong>Matriks Discordance:</strong></p>';
-            html += buatTabelHasil(matriksDiscordance);
-
-            // 3.3 Matriks Dominan
-            html += '<h4>3.3 Matriks Dominan</h4>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Threshold Concordance:</strong></p>
-                    <p>c = (1/m(m-1)) × ΣΣc<sub>kl</sub></p>
-                    <p><strong>Threshold Discordance:</strong></p>
-                    <p>d = (1/m(m-1)) × ΣΣd<sub>kl</sub></p>
-                </div>
-            `;
-
-            let threshold_c = hitungThresholdConcordance(matriksConcordance);
-            let threshold_d = hitungThresholdDiscordance(matriksDiscordance);
-            let matriksDominanC = hitungMatriksDominan(matriksConcordance, threshold_c, true);
-            let matriksDominanD = hitungMatriksDominanDiscordance(matriksDiscordance, threshold_d);
-
-            html += `<p>Threshold Concordance (c) = ${threshold_c.toFixed(3)}</p>`;
-            html += '<p><strong>Matriks Dominan Concordance:</strong></p>';
-            html += buatTabelHasil(matriksDominanC);
-
-            html += `<p>Threshold Discordance (d) = ${threshold_d.toFixed(3)}</p>`;
-            html += '<p><strong>Matriks Dominan Discordance:</strong></p>';
-            html += buatTabelHasil(matriksDominanD);
-
-            // 3.4 Aggregate Dominance Matrix
-            html += '<h4>3.4 Aggregate Dominance Matrix</h4>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Rumus Aggregate Dominance Matrix:</strong></p>
-                    <p>e<sub>kl</sub> = f<sub>kl</sub> × g<sub>kl</sub></p>
-                    <p>Dimana:</p>
-                    <ul>
-                        <li>e<sub>kl</sub> = elemen aggregate dominance matrix</li>
-                        <li>f<sub>kl</sub> = elemen matriks dominan concordance</li>
-                        <li>g<sub>kl</sub> = elemen matriks dominan discordance</li>
-                    </ul>
-                </div>
-            `;
-            html += buatTabelHasil(matriksAggregate);
-
-            // 3.5 Eliminasi Alternatif Less Favourable
-            html += '<h4>3.5 Eliminasi Alternatif Less Favourable</h4>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Analisis Eliminasi:</strong></p>
-                    <p>Berdasarkan Aggregate Dominance Matrix:</p>
-                    <ul>
-            `;
-
-            // Analisis eliminasi berdasarkan Aggregate Dominance Matrix
-            for(let i = 0; i < matriksAggregate.length; i++) {
+                // Identifikasi alternatif yang tereliminasi
+                let eliminasi = new Set();
                 for(let j = 0; j < matriksAggregate.length; j++) {
-                    if(i !== j && matriksAggregate[i][j] === 1) {
-                        html += `<li><strong>${getAlternatifLabel(i)}</strong> mendominasi <strong>${getAlternatifLabel(j)}</strong> 
-                                (e<sub>${i+1}${j+1}</sub> = 1)</li>`;
+                    for(let i = 0; i < matriksAggregate.length; i++) {
+                        if(i !== j && matriksAggregate[i][j] === 1) {
+                            eliminasi.add(j);
+                        }
                     }
                 }
-            }
 
-            // Identifikasi alternatif yang tereliminasi
-            let eliminasi = new Set();
-            for(let j = 0; j < matriksAggregate.length; j++) {
-                for(let i = 0; i < matriksAggregate.length; i++) {
-                    if(i !== j && matriksAggregate[i][j] === 1) {
-                        eliminasi.add(j);
+                html += '</ul><p><strong>Kesimpulan Eliminasi:</strong></p><ul>';
+
+                if(eliminasi.size > 0) {
+                    eliminasi.forEach(idx => {
+                        html += `<li><strong>${getAlternatifLabel(idx)}</strong> tereliminasi karena didominasi oleh alternatif lain</li>`;
+                    });
+                    
+                    let alternatifTersisa = [];
+                    for(let i = 0; i < matriksAggregate.length; i++) {
+                        if(!eliminasi.has(i)) {
+                            alternatifTersisa.push(getAlternatifLabel(i));
+                        }
                     }
+                    
+                    html += `<li>Alternatif yang tidak tereliminasi: <strong>${alternatifTersisa.join(', ')}</strong></li>`;
+                } else {
+                    html += '<li>Tidak ada alternatif yang tereliminasi secara dominan</li>';
                 }
-            }
 
-            html += '</ul><p><strong>Kesimpulan Eliminasi:</strong></p><ul>';
-
-            if(eliminasi.size > 0) {
-                eliminasi.forEach(idx => {
-                    html += `<li><strong>${getAlternatifLabel(idx)}</strong> tereliminasi karena didominasi oleh alternatif lain</li>`;
-                });
-                
-                let alternatifTersisa = [];
-                for(let i = 0; i < matriksAggregate.length; i++) {
-                    if(!eliminasi.has(i)) {
-                        alternatifTersisa.push(getAlternatifLabel(i));
-                    }
-                }
-                
-                html += `<li>Alternatif yang tidak tereliminasi: <strong>${alternatifTersisa.join(', ')}</strong></li>`;
-            } else {
-                html += '<li>Tidak ada alternatif yang tereliminasi secara dominan</li>';
-            }
-
-            html += `
-                </ul>
-            </div>
-            `;
-
-            // Menghitung peringkat
-            let peringkat = hitungPeringkat(matriksConcordance);
-
-            // Hasil Akhir
-            html += '<h3>4. Hasil Akhir</h3>';
-            html += `
-                <div class="rumus-keterangan">
-                    <p><strong>Hasil Analisis:</strong></p>
-                    <ol>
-                        <li>Berdasarkan Aggregate Dominance Matrix:
-                            <ul>
-                                <li>Nilai 1: menunjukkan alternatif lebih baik</li>
-                                <li>Nilai 0: menunjukkan alternatif lebih buruk</li>
-                            </ul>
-                        </li>
-                        <li>Peringkat berdasarkan jumlah nilai concordance:
-                            <table>
-                                <tr><th>Alternatif</th><th>Nilai</th><th>Peringkat</th></tr>
-                                ${peringkat.map((p, index) => `
-                                    <tr>
-                                        <td>${getAlternatifLabel(p.alternatif)}</td>
-                                        <td>${Math.round(p.nilai)}</td>
-                                        <td>${index + 1}</td>
-                                    </tr>
-                                `).join('')}
-                            </table>
-                        </li>
-                        <li>Interpretasi Hasil:
-                            <ul>
-                                <li><strong>${getAlternatifLabel(peringkat[0].alternatif)}</strong> adalah alternatif terbaik dengan nilai ${Math.round(peringkat[0].nilai)}</li>
-                                <li>Urutan preferensi: ${peringkat.map(p => getAlternatifLabel(p.alternatif)).join(' > ')}</li>
-                            </ul>
-                        </li>
-                    </ol>
+                html += `
+                    </ul>
                 </div>
-            `;
-            
-            document.getElementById('hasil-section').innerHTML = html;
-        }
+                `;
 
-        // Fungsi untuk menghitung threshold concordance
-        function hitungThresholdConcordance(matriks) {
-            let m = matriks.length; // jumlah alternatif
-            let sum = 0;
-            let count = m * (m-1); // jumlah total perbandingan = m(m-1)
-            
-            // Menjumlahkan semua nilai dalam matriks concordance
-            for(let i = 0; i < m; i++) {
-                for(let j = 0; j < m; j++) {
-                    if(i !== j) { // tidak termasuk diagonal
-                        sum += matriks[i][j];
-                    }
-                }
-            }
-            
-            // Menghitung threshold
-            return sum / count;
-        }
+                // Menghitung peringkat
+                let peringkat = hitungPeringkat(matriksConcordance);
 
-        // Fungsi untuk menghitung threshold discordance
-        function hitungThresholdDiscordance(matriks) {
-            let m = matriks.length; // jumlah alternatif
-            let sum = 0;
-            let count = m * (m-1); // jumlah total perbandingan = m(m-1)
-            
-            // Menjumlahkan semua nilai dalam matriks discordance
-            for(let i = 0; i < m; i++) {
-                for(let j = 0; j < m; j++) {
-                    if(i !== j) { // tidak termasuk diagonal
-                        sum += matriks[i][j];
-                    }
-                }
-            }
-            
-            // Menghitung threshold
-            return sum / count;
-        }
-
-        // Fungsi untuk menghitung matriks dominan
-        function hitungMatriksDominan(matriks, threshold, isGreaterThan) {
-            let hasil = [];
-            for(let i = 0; i < matriks.length; i++) {
-                hasil[i] = [];
-                for(let j = 0; j < matriks.length; j++) {
-                    if(i !== j) {
-                        if(isGreaterThan) {
-                            hasil[i][j] = matriks[i][j] >= threshold ? 1 : 0;
-                        } else {
-                            hasil[i][j] = matriks[i][j] <= threshold ? 1 : 0;
-                        }
-                    }
-                }
-            }
-            return hasil;
-        }
-
-        // Fungsi untuk menghitung aggregate dominance matrix
-        function hitungMatriksAggregate(matriksDominanC, matriksDominanD) {
-            let hasil = [];
-            for(let i = 0; i < matriksDominanC.length; i++) {
-                hasil[i] = [];
-                for(let j = 0; j < matriksDominanC.length; j++) {
-                    if(i !== j) {
-                        hasil[i][j] = matriksDominanC[i][j] * matriksDominanD[i][j];
-                    }
-                }
-            }
-            return hasil;
-        }
-
-        // Fungsi untuk membuat tabel hasil
-        function buatTabelHasil(matriks, isMatriksConcordance = false, isMatriksNormal = false) {
-            let html = '<table>';
-            
-            if (isMatriksNormal) {
-                // Format normal untuk matriks normalisasi dan pembobotan
-                for(let i = 0; i < matriks.length; i++) {
-                    html += '<tr>';
-                    for(let j = 0; j < matriks[i].length; j++) {
-                        let nilai = matriks[i][j];
-                        let tampilan;
-                        if (nilai === undefined) {
-                            tampilan = '-';
-                        } else if (Number.isInteger(nilai)) {
-                            tampilan = nilai;
-                        } else {
-                            tampilan = nilai.toFixed(3);
-                        }
-                        html += `<td>${tampilan}</td>`;
-                    }
-                    html += '</tr>';
-                }
-            } else {
-                // Format 3x3 untuk matriks concordance, discordance, dll
-                html += '<tr><th></th>';
-                for(let i = 0; i < 3; i++) {
-                    html += `<th>A${i+1}</th>`;
-                }
-                html += '</tr>';
+                // Hasil Akhir
+                html += '<h3>4. Hasil Akhir</h3>';
+                html += `
+                    <div class="rumus-keterangan">
+                        <p><strong>Hasil Analisis:</strong></p>
+                        <ol>
+                            <li>Berdasarkan Aggregate Dominance Matrix:
+                                <ul>
+                                    <li>Nilai 1: menunjukkan alternatif lebih baik</li>
+                                    <li>Nilai 0: menunjukkan alternatif lebih buruk</li>
+                                </ul>
+                            </li>
+                            <li>Peringkat berdasarkan jumlah nilai concordance:
+                                <table>
+                                    <tr><th>Alternatif</th><th>Nilai</th><th>Peringkat</th></tr>
+                                    ${peringkat.map((p, index) => `
+                                        <tr>
+                                            <td>${getAlternatifLabel(p.alternatif)}</td>
+                                            <td>${Math.round(p.nilai)}</td>
+                                            <td>${index + 1}</td>
+                                        </tr>
+                                    `).join('')}
+                                </table>
+                            </li>
+                            <li>Interpretasi Hasil:
+                                <ul>
+                                    <li><strong>${getAlternatifLabel(peringkat[0].alternatif)}</strong> adalah alternatif terbaik dengan nilai ${Math.round(peringkat[0].nilai)}</li>
+                                    <li>Urutan preferensi: ${peringkat.map(p => getAlternatifLabel(p.alternatif)).join(' > ')}</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                `;
                 
-                for(let i = 0; i < 3; i++) {
-                    html += `<tr><th>A${i+1}</th>`;
-                    for(let j = 0; j < 3; j++) {
-                        if (i === j) {
-                            html += '<td>-</td>';
-                        } else {
+                document.getElementById('hasil-section').innerHTML = html;
+                
+                // Tambahkan tombol preview setelah hasil
+                html += `
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button onclick="saveToDatabase()" class="btn btn-success">
+                            <i class="fas fa-save"></i> Simpan ke Database
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('hasil-section').innerHTML = html;
+            }
+
+            // Fungsi untuk menghitung threshold concordance
+            function hitungThresholdConcordance(matriks) {
+                let m = matriks.length; // jumlah alternatif
+                let sum = 0;
+                let count = m * (m-1); // jumlah total perbandingan = m(m-1)
+                
+                // Menjumlahkan semua nilai dalam matriks concordance
+                for(let i = 0; i < m; i++) {
+                    for(let j = 0; j < m; j++) {
+                        if(i !== j) { // tidak termasuk diagonal
+                            sum += matriks[i][j];
+                        }
+                    }
+                }
+                
+                // Menghitung threshold
+                return sum / count;
+            }
+
+            // Fungsi untuk menghitung threshold discordance
+            function hitungThresholdDiscordance(matriks) {
+                let m = matriks.length; // jumlah alternatif
+                let sum = 0;
+                let count = m * (m-1); // jumlah total perbandingan = m(m-1)
+                
+                // Menjumlahkan semua nilai dalam matriks discordance
+                for(let i = 0; i < m; i++) {
+                    for(let j = 0; j < m; j++) {
+                        if(i !== j) { // tidak termasuk diagonal
+                            sum += matriks[i][j];
+                        }
+                    }
+                }
+                
+                // Menghitung threshold
+                return sum / count;
+            }
+
+            // Fungsi untuk menghitung matriks dominan
+            function hitungMatriksDominan(matriks, threshold, isGreaterThan) {
+                let hasil = [];
+                for(let i = 0; i < matriks.length; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < matriks.length; j++) {
+                        if(i !== j) {
+                            if(isGreaterThan) {
+                                hasil[i][j] = matriks[i][j] >= threshold ? 1 : 0;
+                            } else {
+                                hasil[i][j] = matriks[i][j] <= threshold ? 1 : 0;
+                            }
+                        }
+                    }
+                }
+                return hasil;
+            }
+
+            // Fungsi untuk menghitung aggregate dominance matrix
+            function hitungMatriksAggregate(matriksDominanC, matriksDominanD) {
+                let hasil = [];
+                for(let i = 0; i < matriksDominanC.length; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < matriksDominanC.length; j++) {
+                        if(i !== j) {
+                            hasil[i][j] = matriksDominanC[i][j] * matriksDominanD[i][j];
+                        }
+                    }
+                }
+                return hasil;
+            }
+
+            // Fungsi untuk membuat tabel hasil
+            function buatTabelHasil(matriks, isMatriksConcordance = false, isMatriksNormal = false) {
+                let html = '<table>';
+                
+                if (isMatriksNormal) {
+                    // Format normal untuk matriks normalisasi dan pembobotan
+                    for(let i = 0; i < matriks.length; i++) {
+                        html += '<tr>';
+                        for(let j = 0; j < matriks[i].length; j++) {
                             let nilai = matriks[i][j];
                             let tampilan;
                             if (nilai === undefined) {
                                 tampilan = '-';
-                            } else if (isMatriksConcordance) {
-                                tampilan = Math.round(nilai);
                             } else if (Number.isInteger(nilai)) {
                                 tampilan = nilai;
                             } else {
@@ -904,85 +1074,314 @@
                             }
                             html += `<td>${tampilan}</td>`;
                         }
+                        html += '</tr>';
+                    }
+                } else {
+                    // Format 3x3 untuk matriks concordance, discordance, dll
+                    html += '<tr><th></th>';
+                    for(let i = 0; i < 3; i++) {
+                        html += `<th>A${i+1}</th>`;
                     }
                     html += '</tr>';
-                }
-            }
-            
-            html += '</table>';
-            return html;
-        }
-
-        // Fungsi untuk menghitung peringkat
-        function hitungPeringkat(matriksConcordance) {
-            let nilai = [];
-            for(let i = 0; i < matriksConcordance.length; i++) {
-                let sum = 0;
-                for(let j = 0; j < matriksConcordance.length; j++) {
-                    if(i !== j) {
-                        sum += matriksConcordance[i][j] || 0;
+                    
+                    for(let i = 0; i < 3; i++) {
+                        html += `<tr><th>A${i+1}</th>`;
+                        for(let j = 0; j < 3; j++) {
+                            if (i === j) {
+                                html += '<td>-</td>';
+                            } else {
+                                let nilai = matriks[i][j];
+                                let tampilan;
+                                if (nilai === undefined) {
+                                    tampilan = '-';
+                                } else if (isMatriksConcordance) {
+                                    tampilan = Math.round(nilai);
+                                } else if (Number.isInteger(nilai)) {
+                                    tampilan = nilai;
+                                } else {
+                                    tampilan = nilai.toFixed(3);
+                                }
+                                html += `<td>${tampilan}</td>`;
+                            }
+                        }
+                        html += '</tr>';
                     }
                 }
-                nilai.push({alternatif: i, nilai: sum});
+                
+                html += '</table>';
+                return html;
             }
-            return nilai.sort((a, b) => b.nilai - a.nilai);
-        }
 
-        // Fungsi untuk mendapatkan label alternatif
-        function getAlternatifLabel(index) {
-            const labels = ['Panel Surya', 'Biogas', 'Mikrohidro'];
-            return labels[index];
-        }
+            // Fungsi untuk menghitung peringkat
+            function hitungPeringkat(matriksConcordance) {
+                let nilai = [];
+                for(let i = 0; i < matriksConcordance.length; i++) {
+                    let sum = 0;
+                    for(let j = 0; j < matriksConcordance.length; j++) {
+                        if(i !== j) {
+                            sum += matriksConcordance[i][j] || 0;
+                        }
+                    }
+                    nilai.push({alternatif: i, nilai: sum});
+                }
+                return nilai.sort((a, b) => b.nilai - a.nilai);
+            }
 
-        // Fungsi untuk menghitung matriks dominan discordance
-        function hitungMatriksDominanDiscordance(matriksDiscordance, threshold) {
-            let hasil = [];
-            let m = matriksDiscordance.length;
-            
-            for(let i = 0; i < m; i++) {
-                hasil[i] = [];
-                for(let j = 0; j < m; j++) {
-                    if(i !== j) {
-                        // Nilai 1 jika dₖₗ ≤ threshold
-                        // Nilai 0 jika dₖₗ > threshold
-                        hasil[i][j] = matriksDiscordance[i][j] <= threshold ? 1 : 0;
+            // Fungsi untuk mendapatkan label alternatif
+            function getAlternatifLabel(index) {
+                const labels = ['Panel Surya', 'Biogas', 'Mikrohidro'];
+                return labels[index];
+            }
+
+            // Fungsi untuk menghitung matriks dominan discordance
+            function hitungMatriksDominanDiscordance(matriksDiscordance, threshold) {
+                let hasil = [];
+                let m = matriksDiscordance.length;
+                
+                for(let i = 0; i < m; i++) {
+                    hasil[i] = [];
+                    for(let j = 0; j < m; j++) {
+                        if(i !== j) {
+                            // Nilai 1 jika dₖₗ ≤ threshold
+                            // Nilai 0 jika dₖₗ > threshold
+                            hasil[i][j] = matriksDiscordance[i][j] <= threshold ? 1 : 0;
+                        }
                     }
                 }
+                return hasil;
             }
-            return hasil;
-        }
 
-        // Cek status login saat halaman dimuat
-        window.onload = function() {
-            if(localStorage.getItem('isLoggedIn') !== 'true') {
+            // Cek status login saat halaman dimuat
+            window.onload = function() {
+                if(localStorage.getItem('isLoggedIn') !== 'true') {
+                    window.location.href = 'index.html';
+                }
+            }
+
+            function logout() {
+                localStorage.removeItem('isLoggedIn');
                 window.location.href = 'index.html';
             }
-        }
 
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            window.location.href = 'index.html';
-        }
+            // Fungsi untuk toggle sidebar
+            function toggleSidebar() {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.querySelector('.container').classList.toggle('active');
+            }
 
-        // Fungsi untuk toggle sidebar
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.querySelector('.container').classList.toggle('active');
-        }
-
-        // Tandai menu aktif
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentPage = window.location.pathname.split('/').pop();
-            const menuLinks = document.querySelectorAll('.sidebar ul li a');
-            
-            menuLinks.forEach(link => {
-                if(link.getAttribute('href') === currentPage) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
+            // Tandai menu aktif
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentPage = window.location.pathname.split('/').pop();
+                const menuLinks = document.querySelectorAll('.sidebar ul li a');
+                
+                menuLinks.forEach(link => {
+                    if(link.getAttribute('href') === currentPage) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
             });
-        });
-    </script>
+
+            function saveToDatabase() {
+                if (!currentHasilPerhitungan) {
+                    showSaveStatus('Tidak ada data yang bisa disimpan. Silakan lakukan perhitungan terlebih dahulu.', false);
+                    return;
+                }
+
+                // Tampilkan status loading
+                const saveStatus = document.getElementById('saveStatus');
+                saveStatus.className = '';
+                saveStatus.style.display = 'block';
+                saveStatus.innerHTML = 'Menyimpan data...';
+
+                // Kirim data ke server
+                fetch('./save_result.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentHasilPerhitungan)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showSaveStatus(`Data berhasil disimpan dengan ID: ${data.id}`, true);
+                        // Redirect ke halaman riwayat setelah 2 detik
+                        setTimeout(() => {
+                            window.location.href = 'electre.php';
+                        }, 2000);
+                    } else {
+                        showSaveStatus(`Gagal menyimpan data: ${data.message}`, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showSaveStatus(`Error: ${error.message}. Pastikan server PHP berjalan dan file save_result.php dapat diakses.`, false);
+                });
+            }
+
+            function showSaveStatus(message, isSuccess) {
+                const saveStatus = document.getElementById('saveStatus');
+                saveStatus.style.display = 'block';
+                saveStatus.className = isSuccess ? 'success' : 'error';
+                saveStatus.innerHTML = message;
+
+                // Sembunyikan pesan setelah 5 detik
+                setTimeout(() => {
+                    saveStatus.style.display = 'none';
+                }, 5000);
+            }
+
+            function generatePDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Persiapkan data untuk PDF
+                preparePDFContent();
+
+                // Tampilkan loading
+                showLoadingMessage('Membuat PDF...');
+
+                // Konversi ke PDF
+                const element = document.getElementById('pdfTemplate');
+                html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: true
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210; // A4 width
+                    const pageHeight = 295; // A4 height
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    // Simpan PDF
+                    doc.save('hasil_analisis_electre.pdf');
+                    hideLoadingMessage();
+                });
+            }
+
+            function preparePDFContent() {
+                if (!currentHasilPerhitungan) return;
+
+                // Set lokasi dan tanggal
+                document.getElementById('pdf-lokasi').textContent = currentHasilPerhitungan.lokasi;
+                document.getElementById('pdf-tanggal').textContent = new Date().toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Siapkan data matriks
+                let matriksHTML = `
+                    <table class="table table-bordered" style="width: 100%; margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #4CAF50; color: white;">Alternatif</th>
+                                <th style="background-color: #4CAF50; color: white;">C1</th>
+                                <th style="background-color: #4CAF50; color: white;">C2</th>
+                                <th style="background-color: #4CAF50; color: white;">C3</th>
+                                <th style="background-color: #4CAF50; color: white;">C4</th>
+                                <th style="background-color: #4CAF50; color: white;">C5</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${currentHasilPerhitungan.matriks.map((row, i) => `
+                                <tr style="background-color: ${i % 2 === 0 ? '#f8f9fa' : 'white'}">
+                                    <td>${getAlternatifLabel(i)}</td>
+                                    ${row.map(val => `<td>${val}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>`;
+
+                // Siapkan hasil analisis
+                let hasilHTML = `
+                    <table class="table table-bordered" style="width: 100%; margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #4CAF50; color: white;">Peringkat</th>
+                                <th style="background-color: #4CAF50; color: white;">Alternatif</th>
+                                <th style="background-color: #4CAF50; color: white;">Nilai</th>
+                                <th style="background-color: #4CAF50; color: white;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${currentHasilPerhitungan.peringkat.map((p, i) => `
+                                <tr style="background-color: ${i === 0 ? '#d4edda' : i % 2 === 0 ? '#f8f9fa' : 'white'}">
+                                    <td>${i+1}</td>
+                                    <td>${getAlternatifLabel(p.alternatif)}</td>
+                                    <td>${Math.round(p.nilai)}</td>
+                                    <td>${i === 0 ? '<strong style="color: #28a745;">Rekomendasi Terbaik</strong>' : 'Alternatif'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>`;
+
+                // Tambahkan rekomendasi detail
+                const terbaik = currentHasilPerhitungan.peringkat[0];
+                const rekomendasiHTML = `
+                    <p>Berdasarkan hasil analisis menggunakan metode ELECTRE, untuk lokasi <strong>${currentHasilPerhitungan.lokasi}</strong>
+                    direkomendasikan untuk menggunakan <strong>${getAlternatifLabel(terbaik.alternatif)}</strong> sebagai sumber energi terbarukan.</p>
+                    <p>Rekomendasi ini didasarkan pada:</p>
+                    <ul>
+                        <li>Nilai tertinggi dalam analisis: ${Math.round(terbaik.nilai)}</li>
+                        <li>Kesesuaian dengan kondisi lokasi</li>
+                        <li>Pertimbangan semua kriteria yang telah ditentukan</li>
+                    </ul>
+                `;
+                document.getElementById('rekomendasiText').innerHTML = rekomendasiHTML;
+
+                document.getElementById('inputMatriks').innerHTML = matriksHTML;
+                document.getElementById('inputBobot').innerHTML = bobotHTML;
+                document.getElementById('hasilAnalisis').innerHTML = hasilHTML;
+            }
+
+            function showLoadingMessage(message) {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loadingMessage';
+                loadingDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    z-index: 9999;
+                `;
+                loadingDiv.innerHTML = message;
+                document.body.appendChild(loadingDiv);
+            }
+
+            function hideLoadingMessage() {
+                const loadingDiv = document.getElementById('loadingMessage');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            }
+        </script>
+    </div>
+
+    <button class="logout-button" onclick="logout()">Logout</button>
 </body>
 </html>
